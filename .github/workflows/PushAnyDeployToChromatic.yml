@@ -1,0 +1,23 @@
+name: Deploy to chromatic
+
+
+on:
+    push
+
+jobs:
+    deploy-to-cromatic:
+        runs-on: ubuntu-latest 
+        steps:
+            - name: Checkout 🔌
+              uses: actions/checkout@v3
+              with:
+                fetch-depth: 0
+
+            - name: Npm install 🛒
+              run: npm install --legacy-peer-deps
+
+            - name: Deploy to chromatic 🚀
+              uses: chromaui/action@v1
+              with:
+                projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+                token: ${{ secrets.GITHUB_TOKEN }}

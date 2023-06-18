@@ -1,0 +1,25 @@
+name: Deploy tests to c Codecov
+
+on: pull_request
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout 🔌
+        uses: actions/checkout@v3
+            
+      - name: Npm install 🛒
+        run: npm install --legacy-peer-deps
+      
+      - name: Lint 📝
+        run: npm run lint
+      
+      - name: Test 📝
+        run: npm run test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+            token: ${{ secrets.CODECOV_TOKEN }}
+
