@@ -49,19 +49,25 @@ const CustomDataGridFC: FC<CustomDataGridPropsFC> = ({
     [setEditingColumnIndex]
   );
 
-  const memInputOnKeyDown = (keyEvt: React.KeyboardEvent<HTMLInputElement>) => {
-    if (keyEvt.key == "Enter") {
-      keyEvt.preventDefault();
-      setEditingColumnIndex(undefined);
-    }
-  };
-  const memInputOnChange = (
-    el: React.ChangeEvent<HTMLInputElement>,
-    currentColumn: TableSchema["colums"][number]
-  ) => {
-    currentColumn.caption = el.target.value;
-    setColums([...colums, currentColumn]);
-  };
+  const memInputOnKeyDown = useCallback(
+    (keyEvt: React.KeyboardEvent<HTMLInputElement>) => {
+      if (keyEvt.key == "Enter") {
+        keyEvt.preventDefault();
+        setEditingColumnIndex(undefined);
+      }
+    },
+    [setEditingColumnIndex]
+  );
+  const memInputOnChange = useCallback(
+    (
+      el: React.ChangeEvent<HTMLInputElement>,
+      currentColumn: TableSchema["colums"][number]
+    ) => {
+      currentColumn.caption = el.target.value;
+      setColums([...colums, currentColumn]);
+    },
+    [setColums]
+  );
 
   return (
     <>
