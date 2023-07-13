@@ -1,5 +1,5 @@
 import { render, fireEvent, waitFor, act } from "@testing-library/react";
-import { DataGrid } from "../components/DataGrid";
+import { CustomDataGrid } from "../components/CustomDataGrid";
 import { TableSchema } from "../dataGridConfigs/report-config";
 import React from "react";
 import userEvent from "@testing-library/user-event";
@@ -192,12 +192,18 @@ const tableMockData = [
 
 describe("Data grid", () => {
   //создавать таблицу на базе конфигурации report-config.json или report-config.js,
-  it("Data grid is renders all columns from configuration", () => {
+  it("Data grid is renders all columns from configuration", async () => {
     const { getByText } = render(
-      <DataGrid {...tableMockConfiguration} data={tableMockData} />
+      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
     );
 
     const columnEnelements: HTMLElement[] = [];
+
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(tableMockConfiguration.colums[0].caption);
+    });
+
     tableMockConfiguration.colums.forEach((col) => {
       columnEnelements.push(getByText(col.caption));
     });
@@ -206,7 +212,7 @@ describe("Data grid", () => {
   //•	предоставлять возможность скрытия/отображения колонок (без изменения источника данных data.js),
   it("Data grid can hide/show columns", async () => {
     const { queryByText, getAllByRole, getByRole } = render(
-      <DataGrid {...tableMockConfiguration} data={tableMockData} />
+      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
     );
     const showHideColumnWidget = getByRole("menu");
     expect(showHideColumnWidget).toBeInTheDocument();
@@ -269,16 +275,18 @@ describe("Data grid", () => {
 
   //•	предоставлять возможность изменения наименования колонок,
   it("Data grid can change column names", async () => {
-    const { queryByText, getByText, getByRole } = render(
-      <DataGrid {...tableMockConfiguration} data={tableMockData} />
+    const { queryByText, getByText, getByRole, debug } = render(
+      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
     );
-
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(tableMockConfiguration.colums[0].caption);
+    });
     const columnEnelements: HTMLElement[] = [];
     tableMockConfiguration.colums.forEach((col) => {
       const foundElement = queryByText(col.caption);
       foundElement && columnEnelements.push(foundElement);
     });
-
     act(() => columnEnelements[0].click());
     const changeColumnHeaderInput = getByRole("form") as HTMLInputElement;
     // при нажатии на колонку - поялвляется инупут с текстом колонки
@@ -286,27 +294,37 @@ describe("Data grid", () => {
       tableMockConfiguration.colums[0].caption
     );
 
-    fireEvent.change(changeColumnHeaderInput, { target: { value: "Test" } });
-    // onBlur - снятие фокуса с инпута
-    userEvent.tab();
-    expect(getByText("Test")).toBeInTheDocument();
+    const someText = "Test";
+    await userEvent.clear(changeColumnHeaderInput);
+    userEvent.type(changeColumnHeaderInput, `${someText}{enter}`);
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      expect(getByText("Test")).toBeInTheDocument();
+    });
   });
   //•	для таблицы сделать пагинацию (20-30 записей на 1 страницу таблицы),
   it("Data grid has a pagination", async () => {
     const { getByText } = render(
-      <DataGrid {...tableMockConfiguration} data={tableMockData} />
+      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
     );
-    expect(getByText("20 / page")).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(getByText("20")).toBeInTheDocument();
+    });
   });
 
   //•	при двойном клике на строку таблицы должно открываться модальное окно, в котором выведена подробная информация о записи.
-  it("Data grid row on doubleclcik shows a detailed information modal", () => {
+  it("Data grid row on doubleclcik shows a detailed information modal", async () => {
     const { getByText, container } = render(
-      <DataGrid {...tableMockConfiguration} data={tableMockData} />
+      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
     );
-    const firstTrAtBody = container
-      .querySelector("tbody")
-      ?.querySelector("tr") as HTMLElement;
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(tableMockConfiguration.colums[0].caption);
+    });
+    const firstTrAtBody = container.querySelector(
+      ".dx-data-row"
+    ) as HTMLElement;
     act(() => userEvent.dblClick(firstTrAtBody));
     expect(getByText(/detailed info/i)).toBeInTheDocument();
   });

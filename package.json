@@ -10,6 +10,8 @@
     "@testing-library/user-event": "^13.5.0",
     "antd": "^5.6.1",
     "date-fns": "^2.30.0",
+    "devextreme": "^21.2.6",
+    "devextreme-react": "^21.2.6",
     "json-schema-to-ts": "^2.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -102,7 +104,8 @@
     "styled-components": "^6.0.0-rc.1",
     "typescript": "^5.0.4",
     "webpack": "^5.83.1",
-    "webpack-cli": "^5.1.1"
+    "webpack-cli": "^5.1.1",
+    "devextreme-themebuilder": "^21.2.6"
   },
   "loki": {
     "configurations": {
