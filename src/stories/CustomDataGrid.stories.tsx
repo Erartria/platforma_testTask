@@ -1,5 +1,10 @@
+import "devextreme/dist/css/dx.common.css";
+import "devextreme/dist/css/dx.light.css";
 import type { Meta, StoryObj } from "@storybook/react";
-import { DataGrid, DataGridProps } from "../components/DataGrid";
+import {
+  CustomDataGrid,
+  CustomDataGridProps,
+} from "../components/CustomDataGrid";
 import { TableSchema } from "../dataGridConfigs/report-config";
 
 const storieTableConfig: TableSchema = {
@@ -188,12 +193,12 @@ const storieTableData = [
   },
 ];
 
-const meta: Meta<DataGridProps> = {
+const meta: Meta<CustomDataGridProps> = {
   title: "DataGrid",
-  component: DataGrid,
+  component: CustomDataGrid,
 };
 
-type Story = StoryObj<DataGridProps>;
+type Story = StoryObj<CustomDataGridProps>;
 
 const args = Object.assign({}, storieTableConfig, { data: storieTableData });
 //👇 Throws a type error it the args don't match the component props
@@ -202,5 +207,6 @@ const Table: Story = {
   args: args,
 };
 
+// eslint-disable-next-line no-restricted-syntax
 export default meta;
 export { Table };

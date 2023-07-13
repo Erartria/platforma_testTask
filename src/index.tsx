@@ -1,17 +1,19 @@
+import "devextreme/dist/css/dx.common.css";
+import "devextreme/dist/css/dx.light.css";
 import React from "react";
 import ReactDOM from "react-dom/client";
 import { reportWebVitals } from "./reportWebVitals";
-import { DataGrid } from "./components/DataGrid";
 import { Data } from "./dataGridConfigs/data";
 import { tableConfiguration } from "./dataGridConfigs/report-config";
 import { HashRouter } from "react-router-dom";
+import { CustomDataGrid } from "./components/CustomDataGrid";
 
 const element = document.getElementById("root");
 if (element) {
   const root = ReactDOM.createRoot(element);
   root.render(
     <HashRouter>
-      <DataGrid {...tableConfiguration} data={Data} />
+      <CustomDataGrid {...tableConfiguration} data={Data} />
     </HashRouter>
   );
 }
