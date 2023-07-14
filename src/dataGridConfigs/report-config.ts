@@ -30,12 +30,20 @@ const tableConfiguration: TableSchema = {
       format: "yyyy-MM-dd",
     },
   ],
+  hiddenColums: [
+    {
+      caption: "Column # 4",
+      dataField: "col4",
+      dataType: "date",
+      format: "yyyy-MM-dd",
+    },
+  ],
 };
 
 type TableSchema = FromSchema<
   typeof tableSchema,
   { references: [typeof columnSchema] }
 >;
-type ColumnSchema = TableSchema["colums"][0];
+type ColumnSchema = TableSchema["colums"][number];
 
 export { TableSchema, ColumnSchema, tableConfiguration };

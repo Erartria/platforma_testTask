@@ -7,13 +7,17 @@ import { Data } from "./dataGridConfigs/data";
 import { tableConfiguration } from "./dataGridConfigs/report-config";
 import { HashRouter } from "react-router-dom";
 import { CustomDataGridFC } from "./components/CustomDataGridFC";
+import { Provider } from "react-redux";
+import { ReduxStore } from "./stores/Redux/store";
 
 const element = document.getElementById("root");
 if (element) {
   const root = ReactDOM.createRoot(element);
   root.render(
     <HashRouter>
-      <CustomDataGridFC {...tableConfiguration} data={Data} />
+      <Provider store={ReduxStore}>
+        <CustomDataGridFC {...tableConfiguration} data={Data} />
+      </Provider>
     </HashRouter>
   );
 }

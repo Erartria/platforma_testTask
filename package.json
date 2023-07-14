@@ -15,8 +15,10 @@
     "json-schema-to-ts": "^2.9.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-redux": "^8.1.1",
     "react-router-dom": "^6.13.0",
     "react-scripts": "5.0.1",
+    "redux-devtools-extension": "^2.13.9",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -83,6 +85,7 @@
     "babel-plugin-named-exports-order": "^0.0.2",
     "chromatic": "^6.17.4",
     "clsx": "^1.2.1",
+    "devextreme-themebuilder": "^21.2.6",
     "env-cmd": "^10.1.0",
     "eslint": "^8.40.0",
     "eslint-config-prettier": "^8.8.0",
@@ -104,8 +107,7 @@
     "styled-components": "^6.0.0-rc.1",
     "typescript": "^5.0.4",
     "webpack": "^5.83.1",
-    "webpack-cli": "^5.1.1",
-    "devextreme-themebuilder": "^21.2.6"
+    "webpack-cli": "^5.1.1"
   },
   "loki": {
     "configurations": {
