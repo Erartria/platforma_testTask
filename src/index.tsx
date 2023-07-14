@@ -6,14 +6,14 @@ import { reportWebVitals } from "./reportWebVitals";
 import { Data } from "./dataGridConfigs/data";
 import { tableConfiguration } from "./dataGridConfigs/report-config";
 import { HashRouter } from "react-router-dom";
-import { CustomDataGrid } from "./components/CustomDataGrid";
+import { CustomDataGridFC } from "./components/CustomDataGridFC";
 
 const element = document.getElementById("root");
 if (element) {
   const root = ReactDOM.createRoot(element);
   root.render(
     <HashRouter>
-      <CustomDataGrid {...tableConfiguration} data={Data} />
+      <CustomDataGridFC {...tableConfiguration} data={Data} />
     </HashRouter>
   );
 }
