@@ -16,7 +16,7 @@ if (element) {
   root.render(
     <HashRouter>
       <Provider store={ReduxStore}>
-        <CustomDataGridFC {...tableConfiguration} data={Data} />
+        <CustomDataGridFC data={Data} />
       </Provider>
     </HashRouter>
   );
