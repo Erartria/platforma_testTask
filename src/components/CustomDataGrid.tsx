@@ -1,19 +1,9 @@
-import { Table } from "antd";
 import React from "react";
 import { DataType } from "../dataGridConfigs/data";
 import { TableSchema } from "../dataGridConfigs/report-config";
 import { ColumnHider } from "./ColumnHider";
 import { DetailedInfoModal, DetailedInfoModalProps } from "./DetailedInfoModal";
-import { format } from "date-fns";
-import { ColumnType } from "antd/es/table";
-import DataGrid, {
-  Column,
-  Grouping,
-  GroupPanel,
-  Pager,
-  Paging,
-  SearchPanel,
-} from "devextreme-react/data-grid";
+import DataGrid, { Column, Pager, Paging } from "devextreme-react/data-grid";
 
 type CustomDataGridProps = TableSchema & {
   data: DataType[];

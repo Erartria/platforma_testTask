@@ -1,7 +1,7 @@
-import React, { FC, useCallback, useState } from "react";
+import React, { FC } from "react";
 import { DataType } from "../dataGridConfigs/data";
 import { TableSchema } from "../dataGridConfigs/report-config";
-import { DetailedInfoModal, DetailedInfoModalProps } from "./DetailedInfoModal";
+import { DetailedInfoModal } from "./DetailedInfoModal";
 import DataGrid, {
   Column,
   ColumnChooser,
@@ -14,16 +14,10 @@ import dxDataGrid, {
 } from "devextreme/ui/data_grid";
 import { OptionChangedEventInfo } from "devextreme/core/dom_component";
 import { useDispatch, useSelector } from "react-redux";
-import { Dispatch } from "redux";
-import { ColumnAction } from "../stores/Redux/tableReducer";
 import { ReduxDispatch, ReduxState } from "../stores/Redux/store";
 
 type CustomDataGridPropsFC = {
   data: DataType[];
-};
-type CustomDataGridStateFC = Required<CustomDataGridPropsFC> & {
-  editingColumnIndex?: number;
-  detailedModal: Partial<DetailedInfoModalProps>;
 };
 
 const pageSizes: Readonly<Array<number>> = [20, 30];
@@ -33,10 +27,6 @@ const CustomDataGridFC: FC<CustomDataGridPropsFC> = ({ data }) => {
   // const [detailedModal, setDetailedModal] = useState<
   //   CustomDataGridStateFC["detailedModal"]
   // >({ isVisible: false });
-
-  const { isVisible: modalIsVisible, record: modalRecord } = useSelector(
-    (selector: ReduxState) => selector.modalReducer
-  );
   const { colums, hiddenColums, name } = useSelector(
     (selector: ReduxState) => selector.tableReducer.schema
   );
