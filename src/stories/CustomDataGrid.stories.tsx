@@ -1,42 +1,10 @@
 import "devextreme/dist/css/dx.common.css";
 import "devextreme/dist/css/dx.light.css";
 import type { Meta, StoryObj } from "@storybook/react";
-import {
-  CustomDataGrid,
-  CustomDataGridProps,
-} from "../components/CustomDataGrid";
-import { TableSchema } from "../dataGridConfigs/report-config";
-
-const storieTableConfig: TableSchema = {
-  name: "Configurable mock table",
-  code: "table-01-mock",
-  colums: [
-    {
-      caption: "Column # 1",
-      dataField: "col1",
-      dataType: "text",
-      alignment: "center",
-    },
-    {
-      caption: "Column # 2",
-      dataField: "col2",
-      dataType: "text",
-      alignment: "left",
-    },
-    {
-      caption: "Column # 3",
-      dataField: "col3",
-      dataType: "text",
-      alignment: "right",
-    },
-    {
-      caption: "Column # 4",
-      dataField: "col4",
-      dataType: "date",
-      format: "yyyy-MM-dd",
-    },
-  ],
-};
+import { Provider } from "react-redux";
+import React from "react";
+import { CustomDataGridFC } from "../components/CustomDataGridFC";
+import { StoriesStore } from "./store/Redux/store";
 
 const storieTableData = [
   {
@@ -193,18 +161,20 @@ const storieTableData = [
   },
 ];
 
-const meta: Meta<CustomDataGridProps> = {
+const meta: Meta<object> = {
   title: "DataGrid",
-  component: CustomDataGrid,
+  component: CustomDataGridFC,
+  decorators: [(story) => <Provider store={StoriesStore}>{story()}</Provider>],
 };
 
-type Story = StoryObj<CustomDataGridProps>;
+type Story = StoryObj<object>;
 
-const args = Object.assign({}, storieTableConfig, { data: storieTableData });
 //👇 Throws a type error it the args don't match the component props
 const Table: Story = {
   name: "DataGrid",
-  args: args,
+  args: {
+    data: storieTableData,
+  },
 };
 
 // eslint-disable-next-line no-restricted-syntax
