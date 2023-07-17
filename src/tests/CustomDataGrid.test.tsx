@@ -1,10 +1,4 @@
-import {
-  render,
-  fireEvent,
-  waitFor,
-  act,
-  findAllByText,
-} from "@testing-library/react";
+import { render, fireEvent, waitFor, act } from "@testing-library/react";
 import React, { ReactNode } from "react";
 import userEvent from "@testing-library/user-event";
 import { Provider } from "react-redux";
