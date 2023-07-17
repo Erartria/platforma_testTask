@@ -1,9 +1,13 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import { type Meta, type StoryObj } from "@storybook/react";
 import { ColumnHider, ColumnHiderProps } from "../components/ColumnHider";
+import { Provider } from "react-redux";
+import React from "react";
+import { StoriesStore } from "./store/Redux/store";
 
 const meta: Meta<ColumnHiderProps> = {
   title: "ColumnHider",
   component: ColumnHider,
+  decorators: [(story) => <Provider store={StoriesStore}>{story()}</Provider>],
 };
 
 type Story = StoryObj<ColumnHiderProps>;

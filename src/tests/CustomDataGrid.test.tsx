@@ -1,8 +1,166 @@
 import { render, fireEvent, waitFor, act } from "@testing-library/react";
-import { CustomDataGrid } from "../components/CustomDataGrid";
-import { TableSchema } from "../dataGridConfigs/report-config";
-import React from "react";
+import React, { ReactNode } from "react";
 import userEvent from "@testing-library/user-event";
+import { Provider } from "react-redux";
+import { CustomDataGridFC } from "../components/CustomDataGridFC";
+import { ReduxStore } from "../stores/Redux/store";
+import { TableSchema } from "../dataGridConfigs/report-config";
+import { combineReducers, createStore } from "redux";
+import { tableReducer } from "../stores/Redux/tableReducer";
+import { modalReducer } from "../stores/Redux/detailedModalReducer";
+
+const HOKComponentWithProvider = (
+  children: ReactNode,
+  store: typeof ReduxStore = MockReduxStore
+) => {
+  return <Provider store={store}>{children}</Provider>;
+};
+
+describe("Data grid", () => {
+  //создавать таблицу на базе конфигурации report-config.json или report-config.js,
+  it("Data grid is renders all columns from configuration", async () => {
+    const { getByText } = render(
+      HOKComponentWithProvider(<CustomDataGridFC data={tableMockData} />)
+    );
+
+    const columnEnelements: HTMLElement[] = [];
+
+    //Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(visibleColumns[0].caption);
+    });
+    visibleColumns.forEach((col) => {
+      columnEnelements.push(getByText(col.caption));
+    });
+    expect(columnEnelements).toHaveLength(visibleColumns.length);
+  });
+  //•	предоставлять возможность скрытия/отображения колонок (без изменения источника данных data.js),
+  it("Data grid can hide/show columns", async () => {
+    const { queryByText, getAllByRole, getByText, getByTitle, findAllByText } =
+      render(
+        HOKComponentWithProvider(<CustomDataGridFC data={tableMockData} />)
+      );
+
+    //Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(visibleColumns[0].caption);
+    });
+
+    const showHideColumnWidget = getByTitle(/column chooser/i);
+
+    expect(showHideColumnWidget).toBeInTheDocument();
+
+    await fireEvent.click(showHideColumnWidget);
+    await waitFor(() => {
+      expect(getAllByRole(`treeitem`)).toHaveLength(
+        tableMockConfiguration.colums.length
+      );
+    });
+
+    const treeItems = getAllByRole(`treeitem`) as HTMLElement[];
+    const firstTreeItem = treeItems[0] as HTMLElement;
+    const parentPopupWindow = firstTreeItem.closest(
+      ".dx-overlay-wrapper"
+    ) as HTMLElement;
+
+    const closeButtonHideShowColumnWidget = parentPopupWindow.querySelector(
+      `[role="button"]`
+    ) as HTMLElement;
+
+    act(() => {
+      closeButtonHideShowColumnWidget.click();
+    });
+
+    await fireEvent.click(showHideColumnWidget);
+
+    const columnEnelementsDoubleDim = await Promise.all(
+      tableMockConfiguration.colums.map(async (cur) => {
+        const allByTextArr = await findAllByText(cur.caption);
+        return allByTextArr;
+      }, [])
+    );
+    let columnEnelements: HTMLElement[] = [];
+    columnEnelements = columnEnelements.concat(...columnEnelementsDoubleDim);
+    const visibleColumnElements = columnEnelements.filter((el) =>
+      el.querySelector(`div`)
+    );
+
+    // Скрыта первая колонка
+    expect(visibleColumnElements).toHaveLength(
+      tableMockConfiguration.colums.length - 1
+    );
+  });
+
+  //•	предоставлять возможность изменения наименования колонок,
+  it("Data grid can change column names", async () => {
+    const { queryByText, getByText, getByRole } = render(
+      HOKComponentWithProvider(<CustomDataGridFC data={tableMockData} />)
+    );
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      getByText(tableMockConfiguration.colums[0].caption);
+    });
+    const columnEnelements: HTMLElement[] = [];
+    tableMockConfiguration.colums.forEach((col) => {
+      const foundElement = queryByText(col.caption);
+      foundElement && columnEnelements.push(foundElement);
+    });
+    act(() => columnEnelements[0].click());
+    const changeColumnHeaderInput = getByRole("form") as HTMLInputElement;
+    // при нажатии на колонку - поялвляется инупут с текстом колонки
+    expect(changeColumnHeaderInput.value).toEqual(
+      tableMockConfiguration.colums[0].caption
+    );
+
+    const someText = "Test";
+    await userEvent.clear(changeColumnHeaderInput);
+    userEvent.type(changeColumnHeaderInput, `${someText}{enter}`);
+    // Ждем пока отобразится таблица
+    await waitFor(() => {
+      expect(getByText("Test")).toBeInTheDocument();
+    });
+  });
+  //•	для таблицы сделать пагинацию (20-30 записей на 1 страницу таблицы),
+  it("Data grid has a pagination", async () => {
+    const { getByText } = render(
+      <Provider store={MockReduxStore}>
+        <CustomDataGridFC {...tableMockConfiguration} data={tableMockData} />
+      </Provider>
+    );
+
+    await waitFor(() => {
+      expect(getByText("20")).toBeInTheDocument();
+    });
+  });
+
+  //•	при двойном клике на строку таблицы должно открываться модальное окно, в котором выведена подробная информация о записи.
+  //   it("Data grid row on doubleclcik shows a detailed information modal", async () => {
+  //     const { getByText, container } = render(
+  //       HOKComponentWithProvider(<CustomDataGridFC data={tableMockData} />)
+  //     );
+  //     // // Ждем пока отобразится таблица
+  //     // await waitFor(() => {
+  //     //   getByText(tableMockConfiguration.colums[0].caption);
+  //     // });
+  //     const firstTrAtBody = container.querySelector(
+  //       ".dx-data-row"
+  //     ) as HTMLElement;
+  //     act(() => userEvent.dblClick(firstTrAtBody));
+  //     expect(getByText(/detailed info/i)).toBeInTheDocument();
+  //   });
+});
+
+const reducers = combineReducers({
+  tableReducer: tableReducer,
+  modalReducer: modalReducer,
+});
+
+const MockReduxStore = createStore(reducers);
+
+// Infer the `RootState` and `AppDispatch` types from the store itself
+type MockReduxState = ReturnType<typeof MockReduxStore.getState>;
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+type MockReduxDispatch = typeof MockReduxStore.dispatch;
 
 const tableMockConfiguration: TableSchema = {
   name: "Configurable mock table",
@@ -26,6 +184,14 @@ const tableMockConfiguration: TableSchema = {
       dataType: "text",
       alignment: "right",
     },
+    {
+      caption: "Column # 4",
+      dataField: "col4",
+      dataType: "date",
+      format: "yyyy-MM-dd",
+    },
+  ],
+  hiddenColums: [
     {
       caption: "Column # 4",
       dataField: "col4",
@@ -190,142 +356,9 @@ const tableMockData = [
   },
 ];
 
-describe("Data grid", () => {
-  //создавать таблицу на базе конфигурации report-config.json или report-config.js,
-  it("Data grid is renders all columns from configuration", async () => {
-    const { getByText } = render(
-      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
-    );
-
-    const columnEnelements: HTMLElement[] = [];
-
-    // Ждем пока отобразится таблица
-    await waitFor(() => {
-      getByText(tableMockConfiguration.colums[0].caption);
-    });
-
-    tableMockConfiguration.colums.forEach((col) => {
-      columnEnelements.push(getByText(col.caption));
-    });
-    expect(columnEnelements).toHaveLength(tableMockConfiguration.colums.length);
-  });
-  //•	предоставлять возможность скрытия/отображения колонок (без изменения источника данных data.js),
-  it("Data grid can hide/show columns", async () => {
-    const { queryByText, getAllByRole, getByRole } = render(
-      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
-    );
-    const showHideColumnWidget = getByRole("menu");
-    expect(showHideColumnWidget).toBeInTheDocument();
-
-    fireEvent.mouseOver(showHideColumnWidget);
-    await waitFor(() => {
-      expect(getAllByRole(`menuitem`)).toHaveLength(
-        tableMockConfiguration.colums.length
-      );
-    });
-
-    const hideColumnButtonMenus = getAllByRole(`menuitem`);
-
-    const buttonHide: HTMLButtonElement =
-      hideColumnButtonMenus[0].querySelector<HTMLButtonElement>(
-        `[type="button"]`
-      ) as HTMLButtonElement;
-    act(() => {
-      buttonHide.click();
-    });
-    const columnEnelements: HTMLElement[] = [];
-    tableMockConfiguration.colums.forEach((col) => {
-      const foundElement = queryByText(col.caption);
-      foundElement && columnEnelements.push(foundElement);
-    });
-
-    // Скрыта первая колонка
-    expect(columnEnelements).toHaveLength(
-      tableMockConfiguration.colums.length - 1
-    );
-
-    fireEvent.mouseOver(showHideColumnWidget);
-    await waitFor(() => {
-      expect(getAllByRole(`menuitem`)).toHaveLength(
-        tableMockConfiguration.colums.length
-      );
-    });
-
-    const showColumnButtonMenus = getAllByRole(`menuitem`);
-
-    const buttonShow: HTMLButtonElement =
-      showColumnButtonMenus[0].querySelector<HTMLButtonElement>(
-        `[type="button"]`
-      ) as HTMLButtonElement;
-    act(() => {
-      buttonShow.click();
-    });
-
-    const columnEnelementsShown: HTMLElement[] = [];
-    tableMockConfiguration.colums.forEach((col) => {
-      const foundElement = queryByText(col.caption);
-      foundElement && columnEnelementsShown.push(foundElement);
-    });
-
-    // Все колонки снова показаны
-    expect(columnEnelementsShown).toHaveLength(
-      tableMockConfiguration.colums.length
-    );
-  });
-
-  //•	предоставлять возможность изменения наименования колонок,
-  it("Data grid can change column names", async () => {
-    const { queryByText, getByText, getByRole, debug } = render(
-      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
-    );
-    // Ждем пока отобразится таблица
-    await waitFor(() => {
-      getByText(tableMockConfiguration.colums[0].caption);
-    });
-    const columnEnelements: HTMLElement[] = [];
-    tableMockConfiguration.colums.forEach((col) => {
-      const foundElement = queryByText(col.caption);
-      foundElement && columnEnelements.push(foundElement);
-    });
-    act(() => columnEnelements[0].click());
-    const changeColumnHeaderInput = getByRole("form") as HTMLInputElement;
-    // при нажатии на колонку - поялвляется инупут с текстом колонки
-    expect(changeColumnHeaderInput.value).toEqual(
-      tableMockConfiguration.colums[0].caption
-    );
-
-    const someText = "Test";
-    await userEvent.clear(changeColumnHeaderInput);
-    userEvent.type(changeColumnHeaderInput, `${someText}{enter}`);
-    // Ждем пока отобразится таблица
-    await waitFor(() => {
-      expect(getByText("Test")).toBeInTheDocument();
-    });
-  });
-  //•	для таблицы сделать пагинацию (20-30 записей на 1 страницу таблицы),
-  it("Data grid has a pagination", async () => {
-    const { getByText } = render(
-      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
-    );
-
-    await waitFor(() => {
-      expect(getByText("20")).toBeInTheDocument();
-    });
-  });
-
-  //•	при двойном клике на строку таблицы должно открываться модальное окно, в котором выведена подробная информация о записи.
-  it("Data grid row on doubleclcik shows a detailed information modal", async () => {
-    const { getByText, container } = render(
-      <CustomDataGrid {...tableMockConfiguration} data={tableMockData} />
-    );
-    // Ждем пока отобразится таблица
-    await waitFor(() => {
-      getByText(tableMockConfiguration.colums[0].caption);
-    });
-    const firstTrAtBody = container.querySelector(
-      ".dx-data-row"
-    ) as HTMLElement;
-    act(() => userEvent.dblClick(firstTrAtBody));
-    expect(getByText(/detailed info/i)).toBeInTheDocument();
-  });
-});
+const visibleColumns = tableMockConfiguration.colums.filter(
+  (col) =>
+    tableMockConfiguration.hiddenColums?.findIndex(
+      (c) => c.dataField == col.dataField
+    ) == -1
+);

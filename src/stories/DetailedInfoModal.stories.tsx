@@ -3,10 +3,14 @@ import {
   DetailedInfoModal,
   DetailedInfoModalProps,
 } from "../components/DetailedInfoModal";
+import { Provider } from "react-redux";
+import React from "react";
+import { StoriesStore } from "./store/Redux/store";
 
 const meta: Meta<DetailedInfoModalProps> = {
   title: "DetailedInfoModal",
   component: DetailedInfoModal,
+  decorators: [(story) => <Provider store={StoriesStore}>{story()}</Provider>],
 };
 
 type Story = StoryObj<DetailedInfoModalProps>;
@@ -14,16 +18,6 @@ type Story = StoryObj<DetailedInfoModalProps>;
 //👇 Throws a type error it the args don't match the component props
 const DetailedInfo: Story = {
   name: "DetailedInfo",
-  args: {
-    isVisible: true,
-    record: {
-      key: "1",
-      col1: "Test 1",
-      col2: "Test 2",
-      col3: "Test 3",
-      col4: new Date(),
-    },
-  },
 };
 
 export default meta;

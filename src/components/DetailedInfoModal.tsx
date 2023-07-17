@@ -1,6 +1,8 @@
 import { Modal } from "antd";
 import React, { FC } from "react";
 import { DataType } from "../dataGridConfigs/data";
+import { useSelector } from "react-redux";
+import { ReduxState } from "../stores/Redux/store";
 
 type DetailedInfoModalProps = {
   record?: DataType;
@@ -9,12 +11,10 @@ type DetailedInfoModalProps = {
   onCancel: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
 };
 
-const DetailedInfoModal: FC<DetailedInfoModalProps> = ({
-  record,
-  isVisible,
-  onOk,
-  onCancel,
-}) => {
+const DetailedInfoModal: FC<DetailedInfoModalProps> = ({ onOk, onCancel }) => {
+  const { record, isVisible } = useSelector(
+    (selector: ReduxState) => selector.modalReducer
+  );
   return (
     <Modal
       title="Detailed Info"
